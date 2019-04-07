@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import me.ggamer55.scoreboard.entry.Entry;
+import Entry;
 
 import java.util.Arrays;
 import java.util.LinkedList;

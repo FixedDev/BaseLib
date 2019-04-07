@@ -2,8 +2,8 @@ package me.ggamer55.scoreboard.placeholder.implementations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.bukkit.OfflinePlayer;
 import me.ggamer55.scoreboard.placeholder.PlaceholderResolver;
+import org.bukkit.OfflinePlayer;
 
 
 import java.util.Map;

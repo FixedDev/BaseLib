@@ -1,8 +1,8 @@
 package me.ggamer55.scoreboard;
 
 import com.google.common.base.Preconditions;
-import me.ggamer55.scoreboard.entry.Entry;
 import me.ggamer55.scoreboard.placeholder.JoinedPlaceholderResolver;
+import me.ggamer55.scoreboard.entry.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
