@@ -1,6 +1,6 @@
 
 
-package me.ggamer55.scoreboard.entry;
+package me.fixeddev.scoreboard.entry;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

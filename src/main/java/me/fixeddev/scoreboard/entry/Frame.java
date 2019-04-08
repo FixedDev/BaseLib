@@ -1,4 +1,4 @@
-package me.ggamer55.scoreboard.entry;
+package me.fixeddev.scoreboard.entry;
 
 import com.google.common.base.Preconditions;
 import lombok.AllArgsConstructor;

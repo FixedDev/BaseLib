@@ -1,4 +1,4 @@
-package me.ggamer55.scoreboard.placeholder;
+package me.fixeddev.scoreboard.placeholder;
 
 import org.bukkit.OfflinePlayer;
 

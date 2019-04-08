@@ -1,4 +1,4 @@
-package me.ggamer55.scoreboard;
+package me.fixeddev.scoreboard;
 
 /*import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.StringUtils;

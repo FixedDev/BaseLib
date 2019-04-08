@@ -1,6 +1,6 @@
 
 
-package me.ggamer55.scoreboard.placeholder;
+package me.fixeddev.scoreboard.placeholder;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;

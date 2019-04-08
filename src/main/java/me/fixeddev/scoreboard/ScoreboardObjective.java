@@ -1,14 +1,14 @@
-package me.ggamer55.scoreboard;
+package me.fixeddev.scoreboard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import me.ggamer55.scoreboard.entry.Entry;
-import me.ggamer55.scoreboard.entry.Frame;
-import me.ggamer55.scoreboard.placeholder.JoinedPlaceholderResolver;
-import me.ggamer55.scoreboard.placeholder.ListPlaceholderResolver;
-import me.ggamer55.scoreboard.placeholder.PlaceholderResolver;
-import me.ggamer55.scoreboard.placeholder.implementations.PlayerPlaceholderResolver;
+import me.fixeddev.scoreboard.entry.Entry;
+import me.fixeddev.scoreboard.entry.Frame;
+import me.fixeddev.scoreboard.placeholder.JoinedPlaceholderResolver;
+import me.fixeddev.scoreboard.placeholder.ListPlaceholderResolver;
+import me.fixeddev.scoreboard.placeholder.PlaceholderResolver;
+import me.fixeddev.scoreboard.placeholder.implementations.PlayerPlaceholderResolver;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
