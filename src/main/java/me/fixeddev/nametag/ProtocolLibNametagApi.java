@@ -3,11 +3,11 @@ package me.fixeddev.nametag;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,54 +15,100 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class ProtocolLibNametagApi implements NametagApi {
 
+    private static Method PLAYER_GET_HANDLE_METHOD;
+    private static Method HANDLE_GET_PROFILE_METHOD;
+    private static Field PROFILE_NAME_FIELD;
+
     private ProtocolManager protocolManager;
+    private JavaPlugin plugin;
+
     private Map<UUID, String> nametagMap;
 
     public ProtocolLibNametagApi(JavaPlugin plugin) {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
+        this.plugin = plugin;
 
         nametagMap = Maps.newConcurrentMap();
 
-        protocolManager.addPacketListener(new PacketAdapter(plugin, PacketType.Play.Server.NAMED_ENTITY_SPAWN) {
+        protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
+                PacketType.Play.Server.NAMED_ENTITY_SPAWN,
+                PacketType.Play.Server.ENTITY_EFFECT,
+                PacketType.Play.Server.ENTITY_EQUIPMENT,
+                PacketType.Play.Server.ENTITY_METADATA,
+                PacketType.Play.Server.UPDATE_ATTRIBUTES,
+                PacketType.Play.Server.ATTACH_ENTITY,
+                PacketType.Play.Server.BED) {
             @Override
-            public void onPacketReceiving(PacketEvent event) {
-                StructureModifier<WrappedGameProfile> profiles = event.getPacket().getGameProfiles();
-
+            public void onPacketSending(PacketEvent event) {
                 Player toDisplay = (Player) event.getPacket().getEntityModifier(event).read(0);
-
-                WrappedGameProfile original = profiles.read(0);
-                WrappedGameProfile result;
 
                 String nametag = getPlayerNametag(toDisplay);
 
                 String prefix = "";
-                String name = "";
+                String name;
                 String suffix = "";
 
-                if (nametag.length() < 16) {
+                if (nametag.length() <= 16) {
                     name = nametag;
-                } else if (nametag.length() > 16 && nametag.length() < 32) {
+                } else if (nametag.length() <= 32) {
                     prefix = nametag.substring(0, 16);
                     name = nametag.substring(16);
                 } else {
                     prefix = nametag.substring(0, 16);
                     name = nametag.substring(16, 32);
-                    suffix = nametag.substring(32, 48);
+                    suffix = nametag.substring(32, nametag.length() > 48 ? 48 : nametag.length());
                 }
 
                 if (!prefix.isEmpty() || !suffix.isEmpty()) {
                     setNametagPrefixAndSuffix(toDisplay, prefix, suffix);
                 }
 
-                result = original.withName(name);
-                profiles.write(0, result);
+                try {
+                    setGameProfileName(toDisplay, name);
+                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
+                    plugin.getLogger().log(Level.SEVERE, "An error ocurred while changing player " + toDisplay.getName() + " game profile");
+                }
             }
         });
+    }
+
+    private void setGameProfileName(Player player, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        if (PLAYER_GET_HANDLE_METHOD == null) {
+            PLAYER_GET_HANDLE_METHOD = player.getClass().getMethod("getHandle");
+        }
+
+        boolean accessible = PLAYER_GET_HANDLE_METHOD.isAccessible();
+        PLAYER_GET_HANDLE_METHOD.setAccessible(true);
+
+        Object playerHandle = PLAYER_GET_HANDLE_METHOD.invoke(player);
+        PLAYER_GET_HANDLE_METHOD.setAccessible(accessible);
+
+        if (HANDLE_GET_PROFILE_METHOD == null) {
+            HANDLE_GET_PROFILE_METHOD = playerHandle.getClass().getMethod("getProfile");
+        }
+        accessible = HANDLE_GET_PROFILE_METHOD.isAccessible();
+
+        GameProfile playerProfile = (GameProfile) HANDLE_GET_PROFILE_METHOD.invoke(playerHandle);
+        HANDLE_GET_PROFILE_METHOD.setAccessible(accessible);
+
+        if (PROFILE_NAME_FIELD == null) {
+            PROFILE_NAME_FIELD = playerProfile.getClass().getDeclaredField("name");
+        }
+        accessible = PROFILE_NAME_FIELD.isAccessible();
+
+        PROFILE_NAME_FIELD.setAccessible(true);
+        PROFILE_NAME_FIELD.set(playerProfile, name);
+
+        PROFILE_NAME_FIELD.setAccessible(accessible);
     }
 
     private void setNametagPrefixAndSuffix(Player player, String prefix, String suffix) {
@@ -85,15 +131,19 @@ public class ProtocolLibNametagApi implements NametagApi {
     public void setNametag(Player player, String nametag) {
         nametagMap.put(player.getUniqueId(), nametag);
 
-        Bukkit.getOnlinePlayers().forEach(viewer -> {
-            boolean canSee = viewer.canSee(player);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            Bukkit.getOnlinePlayers().forEach(o -> {
+                boolean canSee = o.canSee(player);
 
-            viewer.hidePlayer(player);
+                o.hidePlayer(player);
 
-            if (canSee) {
-                viewer.showPlayer(player);
-            }
-        });
+                if (canSee) {
+                    o.showPlayer(player);
+                }
+            });
+        }, 1);
+
+        protocolManager.updateEntity(player, protocolManager.getEntityTrackers(player));
     }
 
     @Override
