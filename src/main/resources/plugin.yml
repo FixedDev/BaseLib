@@ -2,3 +2,5 @@ name: BaseLib
 author: FixedDev
 main: me.fixeddev.baselib.BaseLibPlugin
 version: ${project.version}
+softdepend:
+  - ProtocolLib
