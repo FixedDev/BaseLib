@@ -35,6 +35,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>us.sparknetwork</groupId>
             <artifactId>BCM-Bukkit</artifactId>
             <version>1.4</version>
