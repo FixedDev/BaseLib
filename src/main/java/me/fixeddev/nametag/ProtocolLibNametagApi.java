@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +32,7 @@ public class ProtocolLibNametagApi implements NametagApi {
     private ProtocolManager protocolManager;
     private JavaPlugin plugin;
 
-    private Map<UUID, String> nametagMap;
+    private Map<UUID, Tag> nametagMap;
 
     public ProtocolLibNametagApi(JavaPlugin plugin) {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
@@ -51,29 +52,14 @@ public class ProtocolLibNametagApi implements NametagApi {
             public void onPacketSending(PacketEvent event) {
                 Player toDisplay = (Player) event.getPacket().getEntityModifier(event).read(0);
 
-                String nametag = getPlayerNametag(toDisplay);
+                Tag nametag = getPlayerNametag(toDisplay);
 
-                String prefix = "";
-                String name;
-                String suffix = "";
-
-                if (nametag.length() <= 16) {
-                    name = nametag;
-                } else if (nametag.length() <= 32) {
-                    prefix = nametag.substring(0, 16);
-                    name = nametag.substring(16);
-                } else {
-                    prefix = nametag.substring(0, 16);
-                    name = nametag.substring(16, 32);
-                    suffix = nametag.substring(32, nametag.length() > 48 ? 48 : nametag.length());
-                }
-
-                if (!prefix.isEmpty() || !suffix.isEmpty()) {
-                    setNametagPrefixAndSuffix(toDisplay, prefix, suffix);
+                if (nametag.hasPrefix() || nametag.hasSuffix()) {
+                    setNametagPrefixAndSuffix(toDisplay, nametag.getPrefix(), nametag.getSuffix());
                 }
 
                 try {
-                    setGameProfileName(toDisplay, name);
+                    setGameProfileName(toDisplay, nametag.getName());
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
                     plugin.getLogger().log(Level.SEVERE, "An error ocurred while changing player " + toDisplay.getName() + " game profile");
                 }
@@ -128,26 +114,28 @@ public class ProtocolLibNametagApi implements NametagApi {
     }
 
     @Override
-    public void setNametag(Player player, String nametag) {
-        nametagMap.put(player.getUniqueId(), nametag);
+    public void setNametag(Player player, String prefix, String name, String suffix) {
+        Tag tag = new SimpleTag(prefix, name, suffix);
 
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            Bukkit.getOnlinePlayers().forEach(o -> {
-                boolean canSee = o.canSee(player);
+        nametagMap.put(player.getUniqueId(), tag);
 
-                o.hidePlayer(player);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                Bukkit.getOnlinePlayers().forEach(o -> {
+                    boolean canSee = o.canSee(player);
 
-                if (canSee) {
-                    o.showPlayer(player);
-                }
-            });
-        }, 1);
+                    o.hidePlayer(player);
+
+                    if (canSee) {
+                        o.showPlayer(player);
+                    }
+                }), 1);
 
         protocolManager.updateEntity(player, protocolManager.getEntityTrackers(player));
     }
 
+    @NotNull
     @Override
-    public String getPlayerNametag(Player player) {
-        return nametagMap.getOrDefault(player.getUniqueId(), player.getName());
+    public Tag getPlayerNametag(Player player) {
+        return nametagMap.getOrDefault(player.getUniqueId(), new SimpleTag(player.getName()));
     }
 }
