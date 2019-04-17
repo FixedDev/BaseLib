@@ -62,10 +62,6 @@ public class ProtocolLibNametagApi implements NametagApi {
                 Tag nametag = getPlayerNametag(toDisplay);
 
                 if (nametag.hasPrefix() || nametag.hasSuffix()) {
-                    if(toDisplay.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()){
-                        toDisplay.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-                    }
-
                     setNametagPrefixAndSuffix(toDisplay, nametag.getPrefix(), nametag.getSuffix());
                 }
 
