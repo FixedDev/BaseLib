@@ -9,6 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+/**
+ * Inspired by the ProjectAres PluginFacetBinder <3
+ */
 public class ServiceBinder {
 
     private Multibinder<Service> serviceMultibinder;
