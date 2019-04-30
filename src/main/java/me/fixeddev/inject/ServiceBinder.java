@@ -28,6 +28,7 @@ public class ServiceBinder {
      * This is not ensured to work
      * @param service - The service to bind
      */
+    @SuppressWarnings("unchecked")
     public void bindService(Service service) {
         serviceMultibinder.addBinding().toInstance(service);
 
@@ -41,7 +42,7 @@ public class ServiceBinder {
      * @param serviceClass - The class of the service to bind
      * @param scope        - The selected scope if null defaults to Scopes.NO_SCOPE
      */
-    public void bindService(Class<Service> serviceClass, @Nullable Scope scope) {
+    public void bindService(Class<? extends Service> serviceClass, @Nullable Scope scope) {
         serviceMultibinder.addBinding().to(serviceClass);
 
         binder.bind(serviceClass).in(Optional.ofNullable(scope)
