@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import me.fixeddev.service.PluginService;
 import me.fixeddev.service.Service;
-import me.ggamer55.bcm.parametric.ParametricCommandHandler;
+import me.fixeddev.bcm.parametric.ParametricCommandHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.PluginManager;
