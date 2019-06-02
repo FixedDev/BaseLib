@@ -1,6 +1,6 @@
 package me.fixeddev.service;
 
-import me.ggamer55.bcm.parametric.ParametricCommandHandler;
+import me.fixeddev.bcm.parametric.ParametricCommandHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
